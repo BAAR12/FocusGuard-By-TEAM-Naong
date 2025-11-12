@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This layout allows us to show a "red dot" badge on the icon -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:clipToPadding="false"
+    android:focusable="true"
+    android:clickable="true"
+    android:background="?attr/actionBarItemBackground"
+    style="@android:style/Widget.ActionButton">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_notifications"
+        android:contentDescription="Notifications" />
+
+    <!-- This is the red dot badge -->
+    <TextView
+        android:id="@+id/notification_badge"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:layout_gravity="top|end"
+        android:layout_marginEnd="6dp"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/notification_badge_background"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textSize="8sp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        xmlns:tools="http://schemas.android.com/tools" />
+
+</FrameLayout>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dashboard_background_dark"
+    tools:context=".FocusModeActivity">
+
+    <!-- ... (Toolbar code is correct) ... -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/toolbar_purple"
+        app:layout_constraintTop_toTopOf="parent"
+        app:titleTextColor="@color/white">
+
+        <TextView
+            android:id="@+id/toolbar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Focus Mode"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <TextView
+        android:id="@+id/textTimer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="25:00"
+        android:textColor="@color/white"
+        android:textSize="96sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/buttonEmergencyExit"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintVertical_bias="0.4" />
+
+    <Button
+        android:id="@+id/buttonEmergencyExit"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/button_emergency_gradient"
+        android:text="Emergency Exit"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/quoteCard"
+        app:layout_constraintEnd_toStartOf="@+id/buttonPausePlay"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Pause/Play Button -->
+    <ImageButton
+        android:id="@+id/buttonPausePlay"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/button_pause_reset_background"
+        android:contentDescription="Pause Button"
+        android:src="@drawable/ic_pause"
+        app:tint="@color/white"
+        app:layout_constraintBottom_toBottomOf="@id/buttonEmergencyExit"
+        app:layout_constraintEnd_toStartOf="@+id/buttonStartBreak"
+        app:layout_constraintTop_toTopOf="@id/buttonEmergencyExit" />
+
+    <!-- *** THIS IS THE FIX: visibility="visible" *** -->
+    <ImageButton
+        android:id="@+id/buttonStartBreak"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/button_pause_reset_background"
+        android:contentDescription="Start Break"
+        android:src="@drawable/ic_break_time"
+        android:visibility="visible"
+        app:tint="@color/white"
+        app:layout_constraintBottom_toBottomOf="@id/buttonEmergencyExit"
+        app:layout_constraintEnd_toStartOf="@+id/buttonReset"
+        app:layout_constraintTop_toTopOf="@id/buttonEmergencyExit" />
+    <!-- *** END OF FIX *** -->
+
+    <!-- Reset Button -->
+    <ImageButton
+        android:id="@+id/buttonReset"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginEnd="32dp"
+        android:background="@drawable/button_pause_reset_background"
+        android:contentDescription="Reset Button"
+        android:src="@drawable/ic_reset"
+        app:tint="@color/white"
+        app:layout_constraintBottom_toBottomOf="@id/buttonEmergencyExit"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/buttonEmergencyExit" />
+
+    <!-- ... (Quote Card layout is correct) ... -->
+    <LinearLayout
+        android:id="@+id/quoteCard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="64dp"
+        android:background="@drawable/card_background_dark"
+        android:orientation="vertical"
+        android:padding="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/textQuote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="“The secret of getting ahead is getting started”"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="italic" />
+
+        <TextView
+            android:id="@+id/textQuoteAuthor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="– Mark Twain"
+            android:textColor="@color/dashboard_text_light"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

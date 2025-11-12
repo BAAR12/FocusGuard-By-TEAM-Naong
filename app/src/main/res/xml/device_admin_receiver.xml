@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This file defines the permissions our Device Admin will request -->
+<device-admin xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-policies>
+        <!-- This is the policy that prevents uninstallation -->
+        <force-lock />
+    </uses-policies>
+</device-admin>

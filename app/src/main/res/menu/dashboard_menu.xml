@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This file creates the menu for your toolbar -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_notifications"
+        android:title="Notifications"
+        app:showAsAction="always"
+        app:actionLayout="@layout/notification_icon_badge" />
+</menu>

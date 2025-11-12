@@ -1,3 +1,30 @@
 <resources>
-    <string name="app_name">focus</string>
+    <string name="app_name">FocusGuard</string>
+
+    <!-- Navigation Drawer -->
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <!-- Accessibility Service -->
+    <string name="accessibility_service_description">
+    Focus accessibility service description
+    </string>
+
+
+    <!--
+    !!! KEYS UPDATED !!!
+    -->
+
+    <!-- 1. From Google Sign-In (Firebase Console > Authentication > Sign-in method) -->
+    <string name="default_web_client_id" translatable="false">998990455453-721smcon2aucu26utpdbpc8hf73b00oe.apps.googleusercontent.com</string>
+
+    <!-- 2. From Facebook Developer Console (Settings > Basic) -->
+    <string name="facebook_app_id" translatable="false">2080546472778952</string>
+
+    <!-- 3. This is just "fb" + your Facebook App ID -->
+    <string name="fb_login_protocol_scheme" translatable="false">fb2080546472778952</string>
+
+    <!-- 4. From Facebook Developer Console (Settings > Advanced) -->
+    <string name="facebook_client_token" translatable="false">1f04166af1de5bf49206dcb726f045e7</string>
+
 </resources>

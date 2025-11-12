@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@drawable/rounded_form_background">
+
+    <!-- Title (e.g., "Emergency Exit" or "Settings Locked") -->
+    <TextView
+        android:id="@+id/textTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PIN Required"
+        android:textColor="@color/dark_text"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <!-- Subtitle (e.g., "Please enter the 4-digit parent PIN...") -->
+    <TextView
+        android:id="@+id/textSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Please enter the 4-digit parent PIN to make this change."
+        android:textColor="@color/text_subtitle_grey"
+        android:textSize="16sp" />
+
+    <!-- PIN Input -->
+    <EditText
+        android:id="@+id/editTextPin"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/edit_text_background"
+        android:hint="••••"
+        android:inputType="numberPassword"
+        android:maxLength="4"
+        android:paddingHorizontal="16dp"
+        android:textAlignment="center"
+        android:textColor="@color/dark_text"
+        android:textSize="18sp" />
+
+    <!-- Button Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:gravity="end"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/buttonPinCancel"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="Cancel"
+            android:textColor="@color/link_blue" />
+
+        <Button
+            android:id="@+id/buttonPinSubmit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_blue_background"
+            android:text="Submit"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
+</LinearLayout>

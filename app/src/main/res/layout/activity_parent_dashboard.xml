@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context=".ParentDashboardActivity"
+    tools:openDrawer="start">
+
+    <!-- Main Content -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/dashboard_background_dark">
+
+        <!-- Toolbar -->
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBarLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/toolbar_purple"
+            app:elevation="0dp"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:navigationIcon="@drawable/ic_menu"
+                app:titleTextColor="@color/white">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/toolbarTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Parent Dashboard"
+                        android:textColor="@color/dashboard_title_light"
+                        android:textSize="20sp"
+                        android.textStyle="bold" />
+                    <TextView
+                        android:id="@+id/toolbarSubtitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Monitor your child's progress"
+                        android:textColor="@color/dashboard_text_light"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+            </androidx.appcompat.widget.Toolbar>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <!-- Scrollable Content -->
+        <ScrollView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toBottomOf="@id/appBarLayout"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <!-- Quick Actions -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Quick Actions"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/buttonParentalSettings"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/button_parental_settings"
+                    android:drawableLeft="@drawable/ic_parental_settings"
+                    android:paddingLeft="24dp"
+                    android:text="Parental Settings"
+                    android:textAlignment="textStart"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/buttonLinkChild"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/button_link_child"
+                    android:drawableLeft="@drawable/ic_link_code_icon"
+                    android:paddingLeft="24dp"
+                    android:text="Link Child's Account"
+                    android:textAlignment="textStart"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <!-- Select Child -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="32dp"
+                    android:text="Select child"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <Spinner
+                    android:id="@+id/spinnerSelectChild"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/edit_text_background"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp" />
+
+                <!-- Child Stats Card -->
+                <LinearLayout
+                    android:id="@+id/cardChildStats"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/card_child_stats_yellow"
+                    android:orientation="vertical"
+                    android:padding="24dp"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <!-- Child Info Header -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/imageChildAvatar"
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
+                            android:src="@drawable/ic_avatar_placeholder"
+                            app:tint="@color/dark_text" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/textChildName"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/dark_text"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                tools:text="Juan Dela Naong" />
+
+                            <TextView
+                                android:id="@+id/textChildGrade"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/text_subtitle_grey"
+                                android:textSize="14sp"
+                                tools:text="Grade 12 | Age 16" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Stats Grid -->
+                    <GridLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:columnCount="2"
+                        android:rowCount="3"
+                        android:useDefaultMargins="true">
+
+                        <!-- Sessions -->
+                        <LinearLayout
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@+id/textStatSessions"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/dark_text"
+                                android:textSize="22sp"
+                                android:textStyle="bold"
+                                tools:text="47" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Sessions"
+                                android:textColor="@color/text_subtitle_grey" />
+                        </LinearLayout>
+
+                        <!-- Total Focus -->
+                        <LinearLayout
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@+id/textStatTotalFocus"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/dark_text"
+                                android:textSize="22sp"
+                                android:textStyle="bold"
+                                tools:text="23h" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Total Focus"
+                                android:textColor="@color/text_subtitle_grey" />
+                        </LinearLayout>
+
+                        <!-- Current Streak -->
+                        <TextView
+                            android:id="@+id/textStatStreak"
+                            android:layout_columnWeight="1"
+                            android:layout_marginTop="16dp"
+                            android:background="@drawable/item_recent_activity"
+                            android:padding="12dp"
+                            android:text="7 Days\nCurrent Streak"
+                            android:textAlignment="center"
+                            android:textColor="@color/dark_text"
+                            android:textStyle="bold" />
+
+                        <!-- Performance -->
+                        <TextView
+                            android:id="@+id/textStatPerformance"
+                            android:layout_columnWeight="1"
+                            android:layout_marginTop="16dp"
+                            android:background="@drawable/item_recent_activity"
+                            android:padding="12dp"
+                            android:text="A+\nPerformance"
+                            android:textAlignment="center"
+                            android:textColor="@color/dark_text"
+                            android:textStyle="bold" />
+
+                        <!-- Weekly Study -->
+                        <TextView
+                            android:id="@+id/textStatWeeklyStudy"
+                            android:layout_columnWeight="1"
+                            android:layout_marginTop="16dp"
+                            android:background="@drawable/item_recent_activity"
+                            android:padding="12dp"
+                            android:text="24.7h (This week)"
+                            android:textAlignment="center"
+                            android:textColor="@color/dark_text"
+                            android:textStyle="bold" />
+
+                        <!-- Avg. Daily -->
+                        <TextView
+                            android:id="@+id/textStatAvgDaily"
+                            android:layout_columnWeight="1"
+                            android:layout_marginTop="16dp"
+                            android:background="@drawable/item_recent_activity"
+                            android:padding="12dp"
+                            android:text="2.5h\nAvg. Daily focus"
+                            android:textAlignment="center"
+                            android:textColor="@color/dark_text"
+                            android:textStyle="bold" />
+
+                    </GridLayout>
+                </LinearLayout>
+
+                <!-- Recent Activity Card -->
+                <LinearLayout
+                    android:id="@+id/cardRecentActivity"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/card_recent_activity_grey"
+                    android:orientation="vertical"
+                    android:padding="24dp"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Recent Activity"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Your child's recent activity"
+                        android:textColor="@color/dashboard_text_light"
+                        android:textSize="14sp" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerRecentActivity"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        tools:listitem="@layout/item_recent_activity"
+                        tools:itemCount="3" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+        </ScrollView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Navigation View -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header"
+        app:menu="@menu/drawer_menu" />
+
+</androidx.drawerlayout.widget.DrawerLayout>

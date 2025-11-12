@@ -1,5 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Base App Colors -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="white_text">#FFFFFFFF</color>
+    <color name="dark_text">#FF333333</color>
+    <color name="hint_grey">#FF888888</color>
+    <color name="text_subtitle_grey">#FFA0A0A0</color>
+    <color name="divider_grey">#FFCCCCCC</color>
+    <color name="social_button_grey">#FFF5F5F5</color>
+    <color name="social_button_stroke">#FFCCCCCC</color>
+    <color name="link_blue">#FF007AFF</color>
+    <color name="blue_text">#FF007AFF</color> <!-- Duplicate for safety -->
+
+    <!-- Theme & Button Colors -->
+    <color name="deep_purple_background">#FF21004A</color>
+    <color name="dark_purple_background">#FF21004A</color> <!-- Duplicate for safety -->
+    <color name="button_blue">#FF007AFF</color>
+    <color name="button_gradient_start">#FFFF4081</color>
+    <color name="button_gradient_end">#FF8800CC</color>
+    <color name="light_grey_button">#FFEAEAEA</color>
+    <color name="button_light_grey">#FFEAEAEA</color> <!-- Duplicate for safety -->
+    <color name="light_grey_button_text">#FF333333</color>
+    <color name="button_light_grey_text">#FF333333</color> <!-- Duplicate for safety -->
+    <color name="edit_text_background">#FFF5F5F5</color>
+    <color name="toggle_background_grey">#FFE0E0E0</color>
+    <color name="light_purple_gradient_start">#FFD4C4FF</color>
+    <color name="light_purple_gradient_end">#FFA594F9</color>
+    <color name="toolbar_purple">#FF3A1B6A</color>
+    <color name="stat_icon_blue">#FF5C9DFF</color>
+
+    <!-- NEW: Dashboard Colors to fix errors -->
+    <color name="dashboard_background_dark">#FF0F0F23</color>
+    <color name="dashboard_card_dark">#FF1C1C3A</color>
+    <color name="dashboard_title_light">#FFFFFFFF</color>
+    <color name="dashboard_text_light">#FFB0B0C0</color>
+    <color name="dashboard_accent_blue">#FF33A1F2</color>
+    <color name="dashboard_accent_yellow">#FFFFD60A</color>
+
+    <!-- Dashboard Button Gradients -->
+    <color name="dashboard_start_button_start">#FFDA22FF</color>
+    <color name="dashboard_start_button_end">#FF8722FF</color>
+    <color name="dashboard_progress_button_start">#FFDA22FF</color>
+    <color name="dashboard_progress_button_end">#FF8722FF</color>
+    <color name="dashboard_emergency_button_start">#FFDA22FF</color>
+    <color name="dashboard_emergency_button_end">#FF8722FF</color>
 </resources>
+
