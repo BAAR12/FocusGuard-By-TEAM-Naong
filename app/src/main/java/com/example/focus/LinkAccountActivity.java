@@ -59,6 +59,7 @@ public class LinkAccountActivity extends AppCompatActivity {
     private FirebaseUser mCurrentUser;
     private String mCurrentUserId;
     private String mUserRole;
+    private String mUserFirstName; // <-- ADDED: To send in notification
 
     // UI Elements
     private Toolbar mToolbar;
@@ -70,7 +71,7 @@ public class LinkAccountActivity extends AppCompatActivity {
     private LayoutInflater mInflater;
     private CardView mCardScanQR;
 
-    // Real-time listener for the current user's document
+    // Real-time listener
     private ListenerRegistration mUserDocListener;
 
     // QR Code Scanner Launcher
@@ -143,9 +144,7 @@ public class LinkAccountActivity extends AppCompatActivity {
         }
     }
 
-    // --- REAL-TIME FIX ---
     private void setupRealTimeListener() {
-        // Listen to the current user's document for real-time changes
         mUserDocListener = mStore.collection("users").document(mCurrentUserId)
                 .addSnapshotListener((documentSnapshot, error) -> {
                     if (error != null) {
@@ -160,6 +159,7 @@ public class LinkAccountActivity extends AppCompatActivity {
 
     private void processUserData(DocumentSnapshot documentSnapshot) {
         mUserRole = documentSnapshot.getString("role");
+        mUserFirstName = documentSnapshot.getString("firstName"); // <-- ADDED
 
         TextView toolbarSubtitle = findViewById(R.id.toolbarSubtitle);
         if ("Student".equals(mUserRole)) {
@@ -176,10 +176,9 @@ public class LinkAccountActivity extends AppCompatActivity {
             displayLinkCode(linkCode);
         }
 
-        // Load and display linked accounts (this will also be real-time thanks to the fetch in this method)
+        // Load and display linked accounts
         loadLinkedAccounts();
     }
-    // --- END REAL-TIME FIX ---
 
     private void launchScanner() {
         ScanOptions options = new ScanOptions();
@@ -188,7 +187,6 @@ public class LinkAccountActivity extends AppCompatActivity {
         options.setCameraId(0);
         options.setBeepEnabled(true);
         options.setBarcodeImageEnabled(false);
-        // FIX: Force to portrait to avoid crash/layout issues
         options.setOrientationLocked(true);
         qrCodeScannerLauncher.launch(options);
     }
@@ -246,6 +244,7 @@ public class LinkAccountActivity extends AppCompatActivity {
                     DocumentSnapshot otherUserDoc = querySnapshot.getDocuments().get(0);
                     String otherUserId = otherUserDoc.getId();
                     String otherUserRole = otherUserDoc.getString("role");
+                    String otherUserFirstName = otherUserDoc.getString("firstName");
 
                     if (mCurrentUserId.equals(otherUserId)) {
                         Toast.makeText(this, "You cannot link your own account.", Toast.LENGTH_SHORT).show();
@@ -257,13 +256,17 @@ public class LinkAccountActivity extends AppCompatActivity {
                         return;
                     }
 
-                    String studentId, parentId;
+                    String studentId, parentId, studentName, parentName;
                     if ("Student".equals(mUserRole)) {
                         studentId = mCurrentUserId;
                         parentId = otherUserId;
+                        studentName = mUserFirstName;
+                        parentName = otherUserFirstName;
                     } else {
                         studentId = otherUserId;
                         parentId = mCurrentUserId;
+                        studentName = otherUserFirstName;
+                        parentName = mUserFirstName;
                     }
 
                     WriteBatch batch = mStore.batch();
@@ -277,7 +280,9 @@ public class LinkAccountActivity extends AppCompatActivity {
                     batch.commit().addOnSuccessListener(aVoid -> {
                         Toast.makeText(this, "Accounts linked successfully!", Toast.LENGTH_SHORT).show();
                         mEditTextLinkCode.setText("");
-                        // The real-time listener (mUserDocListener) will now refresh loadLinkedAccounts()
+                        // --- ADDED: Create notification for the PARENT ---
+                        createLinkNotification(parentId, studentName);
+                        // --- END ---
                     }).addOnFailureListener(e -> {
                         Toast.makeText(this, "Failed to link accounts.", Toast.LENGTH_SHORT).show();
                     });
@@ -366,33 +371,54 @@ public class LinkAccountActivity extends AppCompatActivity {
 
     private void unlinkAccount(String otherUserId) {
         String studentId, parentId;
-        // Determine which ID belongs to the student and which belongs to the parent
         if ("Student".equals(mUserRole)) {
-            studentId = mCurrentUserId; // Current user is student
-            parentId = otherUserId;     // Other user is parent
+            studentId = mCurrentUserId;
+            parentId = otherUserId;
         } else {
-            studentId = otherUserId;    // Other user is student
-            parentId = mCurrentUserId;  // Current user is parent
+            studentId = otherUserId;
+            parentId = mCurrentUserId;
         }
 
         WriteBatch batch = mStore.batch();
 
-        // 1. Update Student: remove linkedParentId (if it exists)
         DocumentReference studentRef = mStore.collection("users").document(studentId);
         batch.update(studentRef, "linkedParentId", FieldValue.delete());
 
-        // 2. Update Parent: remove studentId from linkedChildIds array
         DocumentReference parentRef = mStore.collection("users").document(parentId);
         batch.update(parentRef, "linkedChildIds", FieldValue.arrayRemove(studentId));
 
         batch.commit().addOnSuccessListener(aVoid -> {
             Toast.makeText(this, "Account unlinked successfully.", Toast.LENGTH_SHORT).show();
-            // The real-time listener will handle the UI refresh (loadLinkedAccounts)
+            // The real-time listener will handle the UI refresh
         }).addOnFailureListener(e -> {
             Toast.makeText(this, "Failed to unlink.", Toast.LENGTH_SHORT).show();
             Log.e(TAG, "Unlink failed", e);
         });
     }
+
+    // --- THIS IS THE FIX ---
+    private void createLinkNotification(String parentId, String studentName) {
+        if (parentId == null || parentId.isEmpty()) {
+            Log.d(TAG, "No parent ID found, cannot send notification.");
+            return;
+        }
+
+        Map<String, Object> notificationData = new HashMap<>();
+        notificationData.put("parentId", parentId);
+        notificationData.put("studentName", studentName); // Use the student's name
+        notificationData.put("message", "has successfully linked their account with yours.");
+        notificationData.put("timestamp", FieldValue.serverTimestamp());
+
+        // --- ADDED: This field is required by the parent's query ---
+        notificationData.put("read", false);
+        // --- END OF FIX ---
+
+        mStore.collection("notifications")
+                .add(notificationData)
+                .addOnSuccessListener(documentReference -> Log.d(TAG, "Link notification request created successfully."))
+                .addOnFailureListener(e -> Log.w(TAG, "Error creating link notification request", e));
+    }
+    // --- END ---
 
     private void goToLogin() {
         Intent intent = new Intent(LinkAccountActivity.this, LoginActivity.class);

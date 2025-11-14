@@ -113,6 +113,17 @@ public class FocusModeActivity extends AppCompatActivity {
 
         mPausePlayButton.setImageResource(R.drawable.ic_play);
 
+        // --- FIX: Disable buttons until parent ID is loaded ---
+        mPausePlayButton.setEnabled(false);
+        mPausePlayButton.setAlpha(0.5f);
+        mResetButton.setEnabled(false);
+        mResetButton.setAlpha(0.5f);
+        mEmergencyExitButton.setEnabled(false);
+        mEmergencyExitButton.setAlpha(0.5f);
+        mButtonStartBreak.setEnabled(false);
+        mButtonStartBreak.setAlpha(0.5f);
+        // --- END FIX ---
+
         mPausePlayButton.setOnClickListener(v -> {
             if (mTimerRunning) {
                 pauseTimer();
@@ -126,16 +137,14 @@ public class FocusModeActivity extends AppCompatActivity {
         mButtonStartBreak.setOnClickListener(v -> startBreak());
 
         updateTimerText();
-        fetchStudentData(); // This will now fetch mParentId and update UI
+        // fetchStudentData(); // --- MOVED: This is now called from onResume() ---
 
         OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                // --- UPDATED: Only block if Kiosk Mode is on ---
                 if (mKioskModeActive) {
                     showEmergencyExitDialog();
                 } else {
-                    // Not in kiosk mode (no parent linked), so just exit
                     setEnabled(false);
                     finish();
                 }
@@ -149,30 +158,51 @@ public class FocusModeActivity extends AppCompatActivity {
         }
     }
 
+    // --- THIS IS THE FIX ---
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Fetch the parent ID every time the activity is shown
+        // This ensures mParentId is never stale
+        fetchStudentData();
+    }
+    // --- END OF FIX ---
+
     private void fetchStudentData() {
         mStore.collection("users").document(mUserId).get().addOnSuccessListener(doc -> {
             if (doc.exists()) {
                 mUserFirstName = doc.getString("firstName");
                 mParentId = doc.getString("linkedParentId");
 
-                // --- THIS IS THE FIX ---
-                // If no parent is linked, hide the "Emergency Exit" button
-                // We use INVISIBLE to keep the layout constraints intact.
-                if (mParentId == null || mParentId.isEmpty()) {
-                    mEmergencyExitButton.setVisibility(View.INVISIBLE);
-                    mButtonStartBreak.setVisibility(View.GONE); // Also hide break
-                } else {
-                    mEmergencyExitButton.setVisibility(View.VISIBLE);
-                    // Break button is handled in pauseTimer()
-                }
-                // --- END OF FIX ---
+                // Now that we have mParentId, enable the buttons
+                enableButtons();
+            } else {
+                // Failsafe if doc doesn't exist
+                enableButtons();
             }
         });
     }
 
+    private void enableButtons() {
+        mPausePlayButton.setEnabled(true);
+        mPausePlayButton.setAlpha(1.0f);
+        mResetButton.setEnabled(true);
+        mResetButton.setAlpha(1.0f);
+
+        if (mParentId == null || mParentId.isEmpty()) {
+            mEmergencyExitButton.setVisibility(View.INVISIBLE);
+            mButtonStartBreak.setVisibility(View.GONE);
+        } else {
+            mEmergencyExitButton.setEnabled(true);
+            mEmergencyExitButton.setAlpha(1.0f);
+            mEmergencyExitButton.setVisibility(View.VISIBLE);
+            mButtonStartBreak.setEnabled(true);
+            mButtonStartBreak.setAlpha(1.0f);
+            // Break button visibility is handled in pauseTimer()
+        }
+    }
+
     private void startTimer() {
-        // --- THIS IS THE FIX ---
-        // Only start Kiosk Mode and the Watchdog if a parent is linked
         if (!mKioskModeActive && !mIsInBreak && mParentId != null && !mParentId.isEmpty()) {
             try {
                 startLockTask();
@@ -186,10 +216,9 @@ public class FocusModeActivity extends AppCompatActivity {
             } catch (Exception e) {
                 Log.e(TAG, "Failed to start lock task", e);
                 Toast.makeText(this, "Could not start focus mode. Is Device Admin active?", Toast.LENGTH_LONG).show();
-                return; // Don't start the timer if we can't lock the screen
+                return;
             }
         }
-        // --- END OF FIX ---
 
         mCountDownTimer = new CountDownTimer(mTimeLeftInMillis, 1000) {
             @Override
@@ -197,7 +226,7 @@ public class FocusModeActivity extends AppCompatActivity {
                 mTimeLeftInMillis = millisUntilFinished;
                 updateTimerText();
 
-                if (!mIsInBreak && mKioskModeActive) { // Only save state if in Kiosk Mode
+                if (!mIsInBreak && mKioskModeActive) {
                     getSharedPreferences(StudentDashboardActivity.PREFS_NAME, MODE_PRIVATE).edit()
                             .putLong(StudentDashboardActivity.PREF_REMAINING_FOCUS_TIME, mTimeLeftInMillis)
                             .apply();
@@ -219,7 +248,7 @@ public class FocusModeActivity extends AppCompatActivity {
 
                     Toast.makeText(FocusModeActivity.this, "Break is over! Resuming focus.", Toast.LENGTH_LONG).show();
                     updateTimerText();
-                    startTimer(); // This will re-lock the screen
+                    startTimer();
                 } else {
                     mKioskModeActive = false;
                     logPomodoro();
@@ -243,7 +272,6 @@ public class FocusModeActivity extends AppCompatActivity {
         mIsPaused = true;
         mPausePlayButton.setImageResource(R.drawable.ic_play);
 
-        // Only show break button if not in break and a parent is linked
         if (!mIsInBreak && mParentId != null && !mParentId.isEmpty()) {
             mButtonStartBreak.setVisibility(View.VISIBLE);
         }
@@ -269,7 +297,6 @@ public class FocusModeActivity extends AppCompatActivity {
         mPausePlayButton.setImageResource(R.drawable.ic_play);
         mButtonStartBreak.setVisibility(View.GONE);
 
-        // Save the reset time (if kiosk mode is active)
         if (mKioskModeActive) {
             getSharedPreferences(StudentDashboardActivity.PREFS_NAME, MODE_PRIVATE).edit()
                     .putLong(StudentDashboardActivity.PREF_REMAINING_FOCUS_TIME, mTimeLeftInMillis)
@@ -297,7 +324,6 @@ public class FocusModeActivity extends AppCompatActivity {
 
         updateTimerText();
 
-        // --- UNLOCK KIOSK MODE ---
         try {
             stopLockTask();
             prefs.edit().putBoolean(StudentDashboardActivity.PREF_FOCUS_MODE_ACTIVE, false).apply();
@@ -306,7 +332,6 @@ public class FocusModeActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e(TAG, "Failed to stop lock task for break", e);
         }
-        // --- END ---
 
         createNotification(mUserFirstName + " has started a 5-minute break.");
     }
@@ -456,6 +481,7 @@ public class FocusModeActivity extends AppCompatActivity {
                 });
     }
 
+    // --- THIS IS THE FIX ---
     private void createNotification(String message) {
         if (mParentId == null || mParentId.isEmpty()) {
             Log.d(TAG, "No parent ID found, cannot send notification.");
@@ -469,11 +495,16 @@ public class FocusModeActivity extends AppCompatActivity {
         notificationData.put("message", message);
         notificationData.put("timestamp", FieldValue.serverTimestamp());
 
+        // --- ADDED: This field is required by the parent's query ---
+        notificationData.put("read", false);
+        // --- END OF FIX ---
+
         mStore.collection("notifications")
                 .add(notificationData)
                 .addOnSuccessListener(documentReference -> Log.d(TAG, "Notification request created successfully."))
                 .addOnFailureListener(e -> Log.w(TAG, "Error creating notification request", e));
     }
+    // --- END OF FIX ---
 
     private void goToLogin() {
         Intent intent = new Intent(FocusModeActivity.this, LoginActivity.class);

@@ -1,6 +1,6 @@
 package com.example.focus;
 
-// --- (imports are correct) ---
+// --- (imports) ---
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
@@ -48,12 +48,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+// --- ADDED: Import for real-time listener ---
+import com.google.firebase.firestore.ListenerRegistration;
 
 public class StudentDashboardActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "StudentDashboard";
 
-    // --- SharedPreferences Keys ---
+    // --- (All SharedPreferences Keys are correct) ---
     public static final String PREFS_NAME = "FocusGuardPrefs";
     public static final String PREF_SECURITY_PIN = "securityPin";
     public static final String PREF_SETTINGS_UNLOCKED_UNTIL = "settingsUnlockedUntil";
@@ -74,7 +76,10 @@ public class StudentDashboardActivity extends AppCompatActivity implements Navig
     private String mUserId;
     private String mParentId;
 
-    // UI
+    // --- ADDED: Listener Registration ---
+    private ListenerRegistration mUserListener;
+
+    // UI Elements
     private TextView mWelcomeText, mTextTimer, mPomodoroCount, mHoursToday;
     private Button mStartButton, mProgressReportButton;
     private Toolbar mToolbar;
@@ -138,11 +143,26 @@ public class StudentDashboardActivity extends AppCompatActivity implements Navig
         super.onResume();
         Log.d(TAG, "onResume called.");
 
-        // Refresh data every time the screen becomes visible
-        Log.d(TAG, "onResume: Fetching latest user data and stats...");
-        fetchUserData();
+        // --- THIS IS THE FIX ---
+        // Start the real-time listener
+        setupUserDataListener();
+        // --- END OF FIX ---
+
+        // Fetch stats (this doesn't need to be real-time)
         fetchDashboardStats();
     }
+
+    // --- ADDED: onPause to stop the listener ---
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Detach the listener to prevent memory leaks when the app is in the background
+        if (mUserListener != null) {
+            mUserListener.remove();
+            mUserListener = null;
+        }
+    }
+    // --- END ---
 
     private void setupNavigationDrawer() {
         mDrawerLayout = findViewById(R.id.drawer_layout);
@@ -203,8 +223,8 @@ public class StudentDashboardActivity extends AppCompatActivity implements Navig
         TextView navHeaderName = headerView.findViewById(R.id.nav_header_name);
         TextView navHeaderEmail = headerView.findViewById(R.id.nav_header_email);
 
-        navHeaderName.setText(name);
-        navHeaderEmail.setText(email);
+        if(navHeaderName != null) navHeaderName.setText(name);
+        if(navHeaderEmail != null) navHeaderEmail.setText(email);
     }
 
     private void showEditTimeDialog() {
@@ -271,12 +291,24 @@ public class StudentDashboardActivity extends AppCompatActivity implements Navig
     }
 
     // --- THIS IS THE FIX ---
-    private void fetchUserData() {
-        mStore.collection("users").document(mUserId).get()
-                .addOnSuccessListener(studentDoc -> {
+    // Renamed from fetchUserData to setupUserDataListener
+    private void setupUserDataListener() {
+        // Detach any old listener
+        if (mUserListener != null) {
+            mUserListener.remove();
+        }
+
+        // Attach a new real-time listener to the student's document
+        mUserListener = mStore.collection("users").document(mUserId)
+                .addSnapshotListener((studentDoc, error) -> {
+                    if (error != null) {
+                        Log.w(TAG, "Listen failed.", error);
+                        return;
+                    }
+
                     long defaultTime = 25 * 60 * 1000;
 
-                    if (studentDoc.exists()) {
+                    if (studentDoc != null && studentDoc.exists()) {
                         String firstName = studentDoc.getString("firstName");
                         String email = studentDoc.getString("email");
 
@@ -318,7 +350,6 @@ public class StudentDashboardActivity extends AppCompatActivity implements Navig
                                             // Now we have all data. Sync to SharedPreferences.
                                             syncSettingsToPrefs(securityPin, settingsLock, uninstallLock, lockedAppMap);
                                         } else {
-                                            // Parent doc doesn't exist? Sync with no PIN.
                                             syncSettingsToPrefs(null, settingsLock, uninstallLock, lockedAppMap);
                                         }
                                     })
@@ -327,20 +358,18 @@ public class StudentDashboardActivity extends AppCompatActivity implements Navig
                                         syncSettingsToPrefs(null, settingsLock, uninstallLock, lockedAppMap);
                                     });
                         } else {
-                            // No parent is linked. Sync with no PIN.
+                            // No parent is linked. Sync with no PIN and no rules.
                             syncSettingsToPrefs(null, false, false, new HashMap<>());
                         }
+                    } else {
+                        Log.w(TAG, "Student document does not exist. Signing out.");
+                        mAuth.signOut();
+                        goToLogin();
                     }
-                })
-                .addOnFailureListener(e -> {
-                    Log.w(TAG, "Failed to load user data.", e);
-                    mWelcomeText.setText("Hi, User! 👋");
-                    updateNavHeader("FocusGuard User", "error@loading.com");
-                    updateTimerDisplay();
                 });
     }
+    // --- END OF FIX ---
 
-    // --- NEW: Helper method to save all settings to SharedPreferences ---
     private void syncSettingsToPrefs(String pin, Boolean settingsLock, Boolean uninstallLock, Map<String, Boolean> lockedAppMap) {
         SharedPreferences.Editor editor = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
 
@@ -348,6 +377,8 @@ public class StudentDashboardActivity extends AppCompatActivity implements Navig
             editor.putString(PREF_SECURITY_PIN, pin);
             Log.d(TAG, "Security PIN synced to SharedPreferences.");
         } else {
+            // --- THIS IS THE FIX ---
+            // If no parent or no PIN, REMOVE the old pin
             editor.remove(PREF_SECURITY_PIN);
             Log.d(TAG, "No security PIN found. Cleared from SharedPreferences.");
         }
@@ -360,10 +391,12 @@ public class StudentDashboardActivity extends AppCompatActivity implements Navig
                 }
             }
         }
+        // --- THIS IS THE FIX ---
+        // If no parent, lockedAppPackages will be empty, clearing old rules.
+        editor.putStringSet(PREF_LOCKED_APPS_SET, lockedAppPackages);
 
         editor.putBoolean(PREF_SETTINGS_LOCK_ACTIVE, settingsLock != null && settingsLock);
         editor.putBoolean(PREF_UNINSTALL_LOCK_ACTIVE, uninstallLock != null && uninstallLock);
-        editor.putStringSet(PREF_LOCKED_APPS_SET, lockedAppPackages);
 
         editor.apply();
         Log.d(TAG, "All security settings synced to SharedPreferences.");
@@ -373,24 +406,24 @@ public class StudentDashboardActivity extends AppCompatActivity implements Navig
         if (mParentId == null || mParentId.isEmpty()) {
             // NOT LINKED
             mTextReadyToFocus.setText("Please link a parent account to use focus mode.");
-            mTextReadyToFocus.setTextColor(ContextCompat.getColor(this, R.color.dashboard_accent_yellow)); // Make it stand out
+            mTextReadyToFocus.setTextColor(ContextCompat.getColor(this, R.color.dashboard_accent_yellow));
 
             mStartButton.setEnabled(false);
-            mStartButton.setAlpha(0.5f); // Make it look disabled
+            mStartButton.setAlpha(0.5f);
             mProgressReportButton.setEnabled(false);
             mProgressReportButton.setAlpha(0.5f);
-            mTimerCard.setEnabled(false); // Disable editing time
+            mTimerCard.setEnabled(false);
 
         } else {
             // LINKED
             mTextReadyToFocus.setText("Ready to focus?");
-            mTextReadyToFocus.setTextColor(ContextCompat.getColor(this, R.color.dashboard_text_light)); // Default color
+            mTextReadyToFocus.setTextColor(ContextCompat.getColor(this, R.color.dashboard_text_light));
 
             mStartButton.setEnabled(true);
             mStartButton.setAlpha(1.0f);
             mProgressReportButton.setEnabled(true);
             mProgressReportButton.setAlpha(1.0f);
-            mTimerCard.setEnabled(true); // Enable editing time
+            mTimerCard.setEnabled(true);
         }
     }
 

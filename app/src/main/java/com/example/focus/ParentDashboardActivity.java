@@ -3,7 +3,7 @@ package com.example.focus;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu; // <-- ADDED
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -69,9 +69,7 @@ public class ParentDashboardActivity extends AppCompatActivity implements Naviga
     private TextView mTextChildName, mTextChildGrade;
     private TextView mTextStatSessions, mTextStatTotalFocus, mTextStatStreak, mTextStatPerformance, mTextStatWeeklyStudy, mTextStatAvgDaily;
 
-    // --- ADDED: For notification badge ---
     private TextView mNotificationBadge;
-    // --- END ---
 
     // Data
     private List<DocumentSnapshot> mLinkedChildren = new ArrayList<>();
@@ -86,7 +84,7 @@ public class ParentDashboardActivity extends AppCompatActivity implements Naviga
     // --- UPDATED: Listeners for real-time updates ---
     private ListenerRegistration mUserDocListener;
     private ListenerRegistration mSessionListener;
-    private ListenerRegistration mNotificationListener; // <-- ADDED
+    private ListenerRegistration mNotificationListener; // <-- This is now real-time
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -175,17 +173,13 @@ public class ParentDashboardActivity extends AppCompatActivity implements Naviga
             startActivity(new Intent(ParentDashboardActivity.this, LinkAccountActivity.class));
         });
 
-        // Load the Parent's info for the Nav Header
         loadParentDataForNavHeader();
-
-        // Get and save FCM token for notifications
         getAndSaveFCMToken();
 
-        // --- ADDED: Start listening for new notifications ---
-        listenForNewNotifications();
+        // --- CHANGED: Now called in onResume to ensure it's always active ---
+        // listenForNewNotifications();
     }
 
-    // --- ADDED: Inflate the menu with the notification icon ---
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.dashboard_menu, menu);
@@ -196,17 +190,16 @@ public class ParentDashboardActivity extends AppCompatActivity implements Naviga
 
         actionView.setOnClickListener(v -> onOptionsItemSelected(menuItem));
 
-        // We already started listening in onCreate, so the badge will update.
+        // --- MOVED: Start listening *after* the badge is inflated ---
+        listenForNewNotifications();
+
         return true;
     }
 
-    // --- ADDED: Handle clicks on the notification icon ---
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.action_notifications) {
-            // User clicked the bell icon
             Log.d(TAG, "Notification icon clicked.");
-            // Open the NotificationActivity
             Intent intent = new Intent(this, NotificationActivity.class);
             startActivity(intent);
             return true;
@@ -217,15 +210,13 @@ public class ParentDashboardActivity extends AppCompatActivity implements Naviga
     @Override
     protected void onResume() {
         super.onResume();
-        // This will run every time we return to this screen
         fetchLinkedChildren();
 
-        // Re-attach listener if a child was selected
         if (mSelectedChildId != null) {
             loadChildStats(mSelectedChildId);
         }
 
-        // Re-attach notification listener
+        // --- ADDED: Re-attach notification listener ---
         if (mNotificationListener == null) {
             listenForNewNotifications();
         }
@@ -387,7 +378,8 @@ public class ParentDashboardActivity extends AppCompatActivity implements Naviga
         });
     }
 
-    // --- NEW: Listen for unread notifications ---
+    // --- THIS IS THE FIX ---
+    // This method now uses a real-time listener
     private void listenForNewNotifications() {
         if (mNotificationListener != null) {
             mNotificationListener.remove();
@@ -403,6 +395,7 @@ public class ParentDashboardActivity extends AppCompatActivity implements Naviga
                     }
 
                     if (mNotificationBadge == null) {
+                        Log.d(TAG, "Badge is null, can't update. View not inflated yet.");
                         return; // Badge hasn't been created yet
                     }
 
@@ -415,7 +408,7 @@ public class ParentDashboardActivity extends AppCompatActivity implements Naviga
                     }
                 });
     }
-    // --- END ---
+    // --- END OF FIX ---
 
     // --- Helper Functions ---
 
